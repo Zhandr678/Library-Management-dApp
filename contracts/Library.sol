@@ -15,15 +15,15 @@ contract Library
 
     mapping(uint256 => address) bookToOwner;
 
-    event AddBlock(address recipient, uint bookId);
+    event AddBook(address recipient, uint bookId);
     event SetFinished(uint bookId, bool finished);
 
-    function addBlock(string memory name, uint year, string memory author, bool finished) external
+    function addBook(string memory name, uint year, string memory author, bool finished) external
     {
         uint bookId = bookList.length;
         bookList.push(Book(bookId, name, year, author, finished));
         bookToOwner[bookId] = msg.sender;
-        emit AddBlock(msg.sender, bookId);
+        emit AddBook(msg.sender, bookId);
     }
 
     function _getBookList(bool finished) private view returns (Book[] memory)

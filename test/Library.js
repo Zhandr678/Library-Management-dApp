@@ -19,6 +19,23 @@ describe("Library Contract", function(){
     let unfinishedBookList;
     let finishedBookList;
 
+    function verifyBook(bookChain, book){
+        expect(book.name).to.equal(bookChain.name);
+        expect(book.year.toString()).to.equal(bookChain.year.toString());
+        expect(book.author).to.equal(bookChain.author);
+    }
+
+    function verifyBookList(booksFromChain, bookList){
+        expect(booksFromChain.length).to.not.equal(0);
+        expect(booksFromChain.length).to.equal(bookList.length);
+
+        for(let i=0; i < bookList.length; i++){
+            const bookChain = booksFromChain[i];
+            const book = bookList[i];
+            verifyBook(bookChain, book);
+        }
+    }
+
     beforeEach(async function(){
         Library = await ethers.getContractFactory("Library");
         library = await Library.deploy();
@@ -35,7 +52,7 @@ describe("Library Contract", function(){
                 'finished': false
             };
 
-            await library.addbook(book.name, book.year, book.author, book.finished);
+            await library.addBook(book.name, book.year, book.author, book.finished);
             unfinishedBookList.push(book);
         }
 
@@ -47,9 +64,36 @@ describe("Library Contract", function(){
                 'finished': true
             };
 
-            await library.addbook(book.name, book.year, book.author, book.finished);
+            await library.addBook(book.name, book.year, book.author, book.finished);
             finishedBookList.push(book);
         }
     });
+
+    describe("Add a Book", function(){
+        it("Should emit AddBook event", async function(){
+            let book = {
+                'name': getRandomInt(1, 1000).toString(),
+                'year': getRandomInt(1800, 2023).toString(),
+                'author': getRandomInt(1, 1000).toString(),
+                'finished': true
+            };
+
+            await expect(await library.addBook(book.name, book.year, book.author, book.finished)).to.emit(library, "AddBook").withArgs(owner.address, NUM_UNFINISHED_BOOK + NUM_FINISHED_BOOK);
+        });
+    });
+    
+
+    describe("Get Books", function(){
+        it("Should return the correct unfinished books", async function(){
+            const booksFromChain = await library.getUnfinishedBooks();
+            expect(booksFromChain.length).to.equal(NUM_UNFINISHED_BOOK);
+            verifyBookList(booksFromChain, unfinishedBookList);
+        })
+        it("Should return the correct finished books", async function(){
+            const booksFromChain = await library.getFinishedBooks();
+            expect(booksFromChain.length).to.equal(NUM_FINISHED_BOOK);
+            verifyBookList(booksFromChain, finishedBookList);
+        })
+    })
 
 });

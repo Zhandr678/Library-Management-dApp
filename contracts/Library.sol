@@ -1,4 +1,5 @@
-pragma solidity ^0.8.9;
+// SPDX-License-Identifier: Unlicense
+pragma solidity ^0.8.19;
 
 contract Library
 {

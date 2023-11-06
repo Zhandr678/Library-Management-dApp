@@ -60,11 +60,9 @@ contract Library
     }
 
     function setFinished(uint bookId, bool finished) external
+    onlyOwner(bookId)
     {
-        if (bookToOwner[bookId] == msg.sender) 
-        {
-            bookList[bookId].finished = finished;
-            emit SetFinished(bookId, finished);
-        }
+        bookList[bookId].finished = finished;
+        emit SetFinished(bookId, finished);
     }
 }

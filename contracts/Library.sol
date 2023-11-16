@@ -83,7 +83,7 @@ contract Library
     }
 
     function setFinished(uint bookId, bool finished) external
-        onlyOwner(bookId)
+    onlyOwner(bookId)
     {
         bookList[bookId].finished = finished;
         emit SetFinished(bookId, finished);

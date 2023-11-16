@@ -19,7 +19,30 @@ contract Library
     event AddBook(address recipient, uint bookId);
     event SetFinished(uint bookId, bool finished);
 
+    modifier onlyOwner(uint bookId) {
+        require(bookToOwner[bookId] == msg.sender, "You are not the owner of this book");
+        _;
+    }
+
+    modifier validBookName(string memory name) {
+        require(bytes(name).length > 0, "Book name cannot be empty");
+        _;
+    }
+
+    modifier validYear(uint year) {
+        require(year > 0, "Year should be greater than 0");
+        _;
+    }
+
+    modifier validAuthor(string memory author) {
+        require(bytes(author).length > 0, "Author name cannot be empty");
+        _;
+    }
+
     function addBook(string memory name, uint year, string memory author, bool finished) external
+        validBookName(name)
+        validYear(year)
+        validAuthor(author)
     {
         uint bookId = bookList.length;
         bookList.push(Book(bookId, name, year, author, finished));
@@ -29,10 +52,9 @@ contract Library
 
     function _getBookList(bool finished) private view returns (Book[] memory)
     {
-        Book[] memory temp = new Book[](bookList.length); /* Copy to the temporary variable */
+        Book[] memory temp = new Book[](bookList.length);
         uint count = 0;
 
-        /* find books of user */
         for (uint i = 0; i < bookList.length; i++)
         {
             if (bookToOwner[i] == msg.sender && bookList[i].finished == finished) 
@@ -54,17 +76,16 @@ contract Library
     {
         return _getBookList(true);
     }
+
     function getUnfinishedBooks() external view returns (Book[] memory)
     {
         return _getBookList(false);
     }
 
     function setFinished(uint bookId, bool finished) external
+        onlyOwner(bookId)
     {
-        if (bookToOwner[bookId] == msg.sender) 
-        {
-            bookList[bookId].finished = finished;
-            emit SetFinished(bookId, finished);
-        }
+        bookList[bookId].finished = finished;
+        emit SetFinished(bookId, finished);
     }
 }
